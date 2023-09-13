@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -21,14 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mobileapp.ui.model.Student;
 import com.mobileapp.ui.model.request.StudentDetailsRequest;
 import com.mobileapp.ui.model.request.UpdateStudentDetailsRequest;
+import com.mobileapp.ui.service.StudentService;
+import com.mobileapp.ui.service.impl.StudentServiceImpl;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("users") // http://localhost:8082/users
+@RequestMapping("/users") // http://localhost:8082/users
 public class UserController {
 
 	Map<String, Student> student;
+	@Autowired
+	StudentService studentservice;
 
 	@GetMapping
 	public String getUsers(@RequestParam(value = "page1", defaultValue = "1") int page,
@@ -54,18 +59,8 @@ public class UserController {
 	@PostMapping(consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Student> createUser(@Valid @RequestBody StudentDetailsRequest studentDetails) {
-		Student returnVal = new Student();
-		returnVal.setFirstName(studentDetails.getFirstName());
-		returnVal.setLastName(studentDetails.getLastName());
-		returnVal.setEmail(studentDetails.getEmail());
-		returnVal.setPassword(studentDetails.getPassword());
-		String userID = UUID.randomUUID().toString();
-		if (student == null || student.size()== 0) {
-			student = new HashMap<String,Student>();
-			student.put(userID, returnVal);
-		}
-		returnVal.setUserId(userID);
-		return new ResponseEntity<Student>(returnVal, HttpStatus.OK);
+		Student returnval=studentservice.createStudentDetails(studentDetails);
+		return new ResponseEntity<Student>(returnval, HttpStatus.OK);
 	}
 
 	@PutMapping(path = "/{userId}",consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
